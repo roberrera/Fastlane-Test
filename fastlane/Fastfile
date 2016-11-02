@@ -36,16 +36,11 @@ desc "Run all tests and push to git"
     gradle(task: "test")
     push_to_git_remote
     increment_build_number
-
     gradle(
       task: 'assemble',
       build_type: 'Release'
     )
-
-    crashlytics(
-      api_token: '[insert_key_here]',
-      build_secret: '[insert_secret_here]'
-    )
+    crashlytics
 
     # sh "your_script.sh"
   end
