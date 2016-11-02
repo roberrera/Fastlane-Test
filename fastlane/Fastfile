@@ -33,8 +33,6 @@ desc "Run all tests and push to git"
 
 desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
-    newVersionCode = versionCode + 1
-
     # Run tests
     gradle(task: "test")
     # Push to git
@@ -46,7 +44,7 @@ desc "Submit a new Beta Build to Crashlytics Beta"
       build_type: 'Release',
     # Get the last version code and increment it.
       properties: {
-        'versionCode' => newVersionCode,
+        'versionCode' => versionCode + 1,
         'versionName' => versionName
       })
     crashlytics
