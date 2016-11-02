@@ -33,33 +33,25 @@ desc "Run all tests and push to git"
 
 desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
+    newVersionCode = versionCode + 1
+
     # Run tests
     gradle(task: "test")
     # Push to git
+    git tag beta
     push_to_git_remote
-    # Get the last version code and increment it.
-    versionCode = File.read("metadata/versionCode").to_i
-    versionCode = versionCode +1
-
-    f = File.new("metadata/versionCode", "w")
-    f.write(versionCode)
-    f.close
 
     gradle(
       task: 'assemble',
       build_type: 'Release',
-      properties: { 'versionCode' => versionCode }
-      )
+    # Get the last version code and increment it.
+      properties: {
+        'versionCode' => newVersionCode,
+        'versionName' => versionName
+      })
     crashlytics
 
-    # sh "your_script.sh"
   end
-
-#  desc "Deploy a new version to the Google Play"
-#  lane :deploy do
-#    gradle(task: "assembleRelease")
-#    supply
-#  end
 
   after_all do |lane|
     # This block is called, only if the executed lane was successful
@@ -67,6 +59,7 @@ desc "Submit a new Beta Build to Crashlytics Beta"
     # slack(
     #   message: "Successfully deployed new App Update."
     # )
+    print "Completed lane actions"
   end
 
   error do |lane, exception|
@@ -74,6 +67,7 @@ desc "Submit a new Beta Build to Crashlytics Beta"
     #   message: exception.message,
     #   success: false
     # )
+    print "Lane actions failed"
   end
 end
 
