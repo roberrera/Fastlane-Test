@@ -20,36 +20,36 @@ platform :android do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
   end
 
-  desc "Runs all the tests"
+desc "Runs all the tests"
   lane :test do
     gradle(task: "test")
-  end
+end
 
 desc "Run all tests and push to git"
   lane :git do
     gradle(task: "test")
     push_to_git_remote
-  end
+end
 
 desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
-    # Run tests
-    gradle(task: "test")
-    # Push to git
-    git tag beta
-    push_to_git_remote
-
     gradle(
+      task: "test",
       task: 'assemble',
       build_type: 'Release',
-    # Get the last version code and increment it.
-      properties: {
-        'versionCode' => versionCode + 1,
-        'versionName' => versionName
-      })
-    crashlytics
+      properties: { "versionCode" => 1 }
+    )
+    say "Gradle tasks complete"
 
-  end
+    push_git_tags
+    push_to_git_remote
+    say "Pushed to Github"
+
+    changelog_from_git_commits
+    crashlytics
+    say "Uploaded to Crashlytics"
+
+end
 
   after_all do |lane|
     # This block is called, only if the executed lane was successful
@@ -57,7 +57,7 @@ desc "Submit a new Beta Build to Crashlytics Beta"
     # slack(
     #   message: "Successfully deployed new App Update."
     # )
-    print "Completed lane actions"
+    say "Completed lane actions"
   end
 
   error do |lane, exception|
@@ -65,7 +65,7 @@ desc "Submit a new Beta Build to Crashlytics Beta"
     #   message: exception.message,
     #   success: false
     # )
-    print "Lane actions failed"
+    say "Lane actions failed"
   end
 end
 
