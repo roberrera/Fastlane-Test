@@ -31,15 +31,25 @@ desc "Run all tests and push to git"
     push_to_git_remote
   end
 
-  desc "Submit a new Beta Build to Crashlytics Beta"
+desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
+    # Run tests
     gradle(task: "test")
+    # Push to git
     push_to_git_remote
-    increment_build_number
+    # Get the last version code and increment it.
+    versionCode = File.read("metadata/versionCode").to_i
+    versionCode = versionCode +1
+
+    f = File.new("metadata/versionCode", "w")
+    f.write(versionCode)
+    f.close
+
     gradle(
       task: 'assemble',
-      build_type: 'Release'
-    )
+      build_type: 'Release',
+      properties: { 'versionCode' => versionCode }
+      )
     crashlytics
 
     # sh "your_script.sh"
