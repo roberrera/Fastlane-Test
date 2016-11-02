@@ -25,22 +25,36 @@ platform :android do
     gradle(task: "test")
   end
 
+desc "Run all tests and push to git"
+  lane :git do
+    gradle(task: "test")
+    push_to_git_remote
+  end
+
   desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
-    gradle(task: "assembleRelease")
-    crashlytics
+    gradle(task: "test")
+    push_to_git_remote
+    increment_build_number
+
+    gradle(
+      task: 'assemble',
+      build_type: 'Release'
+    )
+
+    crashlytics(
+      api_token: '[insert_key_here]',
+      build_secret: '[insert_secret_here]'
+    )
 
     # sh "your_script.sh"
-    # You can also use other beta testing services here
   end
 
-  desc "Deploy a new version to the Google Play"
-  lane :deploy do
-    gradle(task: "assembleRelease")
-    supply
-  end
-
-  # You can define as many lanes as you want
+#  desc "Deploy a new version to the Google Play"
+#  lane :deploy do
+#    gradle(task: "assembleRelease")
+#    supply
+#  end
 
   after_all do |lane|
     # This block is called, only if the executed lane was successful
