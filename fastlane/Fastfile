@@ -36,7 +36,7 @@ desc "Submit a new Beta Build to Crashlytics Beta"
     gradle(
       task: "test",
       task: 'assemble',
-      build_type: 'Release',
+      build_type: 'Debug',
       properties: { "versionCode" => 1 }
     )
     say "Gradle tasks complete"
@@ -45,7 +45,6 @@ desc "Submit a new Beta Build to Crashlytics Beta"
     push_to_git_remote
     say "Pushed to Github"
 
-    changelog_from_git_commits
     crashlytics
     say "Uploaded to Crashlytics"
 

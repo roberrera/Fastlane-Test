@@ -18,14 +18,34 @@ repositories {
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.0"
-    defaultConfig {
-        applicationId "com.roberterrera.fastlanetest"
-        minSdkVersion 17
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
+
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+        def value = 0
+        def runTasks = gradle.startParameter.taskNames
+        if ('assemble' in runTasks || 'assembleRelease' in runTasks || 'aR' in runTasks) {
+            value = 1;
+        }
+
+        def updatedCode = versionProps['VERSION_CODE'].toInteger() + value
+
+        versionProps['VERSION_CODE'] = updatedCode.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        defaultConfig {
+            applicationId "com.roberterrera.fastlanetest"
+            minSdkVersion 17
+            targetSdkVersion 25
+            versionCode updatedCode
+            versionName "1.0"
+            testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        }
+    } else { throw new GradleException("Could not read version.properties") }
+
     buildTypes {
         release {
             minifyEnabled false
