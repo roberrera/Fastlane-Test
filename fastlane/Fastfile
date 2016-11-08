@@ -32,13 +32,23 @@ desc "Run all tests and push to git"
 end
 
 desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(
-      task: "test",
-      task: 'assemble',
-      build_type: 'Debug',
-      properties: { "versionCode" => 1 }
-    )
+  lane :beta do |options|
+    if (options[:versionChange]=='minor')
+      gradle(task: "test")
+      gradle(task: "doBuildNumberIncrement")
+      gradle(task: "doMinorVersionIncrement")
+      gradle(task: 'assemble', build_type: 'Debug')
+    elsif (options[:versionChange]=='major')
+      gradle(task: "test")
+      gradle(task: "doBuildNumberIncrement")
+      gradle(task: "doMajorVersionIncrement")
+      gradle(task: 'assemble', build_type: 'Debug')
+    else
+      gradle(task: "test")
+      gradle(task: "doBuildNumberIncrement")
+      gradle(task: 'assemble', build_type: 'Debug')
+    end
+
     say "Gradle tasks complete"
 
     push_git_tags
